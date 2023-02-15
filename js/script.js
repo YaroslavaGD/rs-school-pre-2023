@@ -2,12 +2,19 @@ const timeOutput = document.querySelector('.time');
 const dateOutput = document.querySelector('.date');
 const greetingOutput = document.querySelector('.greeting');
 const nameInput = document.querySelector('.name');
+const body = document.querySelector('body');
+const slideNext = document.querySelector('.slide-next');
+const slidePrev = document.querySelector('.slide-prev');
 
 const TIME_OF_DAY = ['morning', 'afternoon', 'evening', 'night'];
+
+let backgroundNumber = 1;
 
 
 showTime();
 
+setRandomBackgroundNum(1,20);
+setBackground();
 
 function showTime() {
   const date = new Date();
@@ -45,7 +52,7 @@ function getTimeOfDay(){
 
 function showGreeting() {
   const timeOfDay = getTimeOfDay();
-  const greetingText = `Good ${timeOfDay}`;
+  const greetingText = `Good ${timeOfDay},`;
   greetingOutput.textContent = greetingText;
 }
 
@@ -63,3 +70,32 @@ function getLocalStorage() {
 }
 window.addEventListener('load', getLocalStorage);
 
+function setRandomBackgroundNum(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  backgroundNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function setBackground(){
+  const timeOfDay = getTimeOfDay();
+
+  let backgroundName =  backgroundNumber < 10 ? "0" + backgroundNumber : backgroundNumber;
+  const img = new Image();
+
+  img.src = `https://raw.githubusercontent.com/YaroslavaGD/stage1-tasks/assets/images/${timeOfDay}/${backgroundName}.jpg`;
+  img.onload = () => {
+    body.style.backgroundImage = `url(${img.src})`;
+  }
+}
+
+function getSlideNext() {
+  backgroundNumber = backgroundNumber == 20 ? 1 : backgroundNumber + 1;
+  setBackground();
+}
+slideNext.addEventListener('click', getSlideNext);
+
+function getSlidePrev() {
+  backgroundNumber = backgroundNumber == 1 ? 20 : backgroundNumber - 1;
+  setBackground();
+}
+slidePrev.addEventListener('click', getSlidePrev);
