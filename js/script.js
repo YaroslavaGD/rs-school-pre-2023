@@ -1,21 +1,34 @@
+const TIME_OF_DAY = ['morning', 'afternoon', 'evening', 'night'];
+let backgroundNumber = 1;
+
+const body = document.querySelector('body');
 const timeOutput = document.querySelector('.time');
 const dateOutput = document.querySelector('.date');
 const greetingOutput = document.querySelector('.greeting');
+
 const nameInput = document.querySelector('.name');
-const body = document.querySelector('body');
+
 const slideNext = document.querySelector('.slide-next');
 const slidePrev = document.querySelector('.slide-prev');
 
-const TIME_OF_DAY = ['morning', 'afternoon', 'evening', 'night'];
+const weatherIconOutput = document.querySelector('.weather-icon');
+const temperatureOutput = document.querySelector('.temperature');
+const weatherDescriptionOutput = document.querySelector('.weather-description');
+const windOutput = document.querySelector('.wind');
+const humidityOutput = document.querySelector('.humidity');
+const weatherErrorOutput = document.querySelector('.weather-error');
 
-let backgroundNumber = 1;
+const cityInput = document.querySelector('.city');
+
+
 
 
 showTime();
-
 setRandomBackgroundNum(1,20);
 setBackground();
 
+
+//====================== TIME AND DATE ======================
 function showTime() {
   const date = new Date();
   const currentTime = date.toLocaleTimeString();
@@ -33,7 +46,6 @@ function showDate() {
   const currentDate = date.toLocaleDateString('de-De', options);
   dateOutput.textContent = currentDate;
 }
-
 
 function getTimeOfDay(){
   const date = new Date();
@@ -57,19 +69,30 @@ function showGreeting() {
 }
 
 
+//====================== LOCAL STORAGE ======================
 function setLocalStorage() {
   localStorage.setItem('name', nameInput.value);
+  localStorage.setItem('city', cityInput.value);
 }
+
 window.addEventListener('beforeunload', setLocalStorage);
 
 function getLocalStorage() {
   const nameLocalStorage = localStorage.getItem('name');
+  const cityLocalStorage = localStorage.getItem('city');
   if (nameLocalStorage) {
     nameInput.value = nameLocalStorage;
+  }
+
+  if (cityLocalStorage) {
+    cityInput.value = cityLocalStorage;
+    getWeather();
   }
 }
 window.addEventListener('load', getLocalStorage);
 
+
+//====================== BACKGROUND AND SLIDER ======================
 function setRandomBackgroundNum(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
@@ -99,3 +122,48 @@ function getSlidePrev() {
   setBackground();
 }
 slidePrev.addEventListener('click', getSlidePrev);
+
+
+//====================== WEATHER ======================
+
+async function getWeather () {
+  try {
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${cityInput.value}&lang=ru&appid=a8ac1027e738e7638e87d25781881790&units=metric`;
+    const res = await fetch(url);
+    const data = await res.json();
+    weatherIconOutput.className = 'weather-icon owf';
+    weatherIconOutput.classList.add(`owf-${data.weather[0].id}`);
+    temperatureOutput.textContent = `${data.main.temp.toFixed(0)}°C`;
+    weatherDescriptionOutput.textContent = data.weather[0].description;
+    windOutput.textContent = `Wind speed:\u00A0${data.wind.speed.toFixed(0)}м/с`;
+    humidityOutput.textContent = `Humidity:\u00A0${data.main.humidity}%`;
+    weatherErrorOutput.textContent = '';
+  } catch (error) {
+    weatherErrorOutput.textContent = 'City "' + cityInput.value + '" not found.';
+    weatherIconOutput.className = 'weather-icon owf';
+    temperatureOutput.textContent = '';
+    weatherDescriptionOutput.textContent = '';
+    windOutput.textContent = '';
+    humidityOutput.textContent = '';
+  }
+}
+
+function setWeather(event) {
+  if(event.code === 'Enter') {
+    getWeather();
+    cityInput.blur();
+  }
+}
+cityInput.addEventListener('keypress', setWeather);
+
+
+//====================== QUOTES ======================
+
+async function getQuotes() {
+  const quotes = 'data.json';
+  const res = await fetch(quotes);
+  const data = await res.json();
+  console.log(data);
+}
+
+getQuotes();
