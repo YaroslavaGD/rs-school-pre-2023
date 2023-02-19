@@ -1,6 +1,7 @@
 const TIME_OF_DAY = ['morning', 'afternoon', 'evening', 'night'];
 let backgroundNumber = 1;
 
+
 const body = document.querySelector('body');
 const timeOutput = document.querySelector('.time');
 const dateOutput = document.querySelector('.date');
@@ -8,8 +9,10 @@ const greetingOutput = document.querySelector('.greeting');
 
 const nameInput = document.querySelector('.name');
 
+
 const slideNext = document.querySelector('.slide-next');
 const slidePrev = document.querySelector('.slide-prev');
+
 
 const weatherIconOutput = document.querySelector('.weather-icon');
 const temperatureOutput = document.querySelector('.temperature');
@@ -21,11 +24,15 @@ const weatherErrorOutput = document.querySelector('.weather-error');
 const cityInput = document.querySelector('.city');
 
 
+const changeQuoteButton = document.querySelector('.change-quote');
+const quoteOutput = document.querySelector('.quote');
+const authorOutput = document.querySelector('.author');
 
 
 showTime();
 setRandomBackgroundNum(1,20);
 setBackground();
+getQuotes();
 
 
 //====================== TIME AND DATE ======================
@@ -93,10 +100,14 @@ window.addEventListener('load', getLocalStorage);
 
 
 //====================== BACKGROUND AND SLIDER ======================
+function getRandomNum(min, max) {
+  const minNew = Math.ceil(min);
+  const maxNew = Math.floor(max);
+  return Math.floor(Math.random() * (maxNew - minNew + 1)) + minNew;
+}
+
 function setRandomBackgroundNum(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  backgroundNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+  backgroundNumber = getRandomNum(min, max);
 }
 
 function setBackground(){
@@ -163,7 +174,10 @@ async function getQuotes() {
   const quotes = 'data.json';
   const res = await fetch(quotes);
   const data = await res.json();
-  console.log(data);
-}
 
-getQuotes();
+  const randomNumber = getRandomNum(0, data.length - 1);
+
+  quoteOutput.textContent = '"' + data[randomNumber].text + '"';
+  authorOutput.textContent = data[randomNumber].author;
+}
+changeQuoteButton.addEventListener('click', getQuotes);

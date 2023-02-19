@@ -48,7 +48,8 @@ body {
 }
 
 .player-icon, 
-.slider-icon {
+.slider-icon,
+.change-quote {
   width: 32px;
   height: 32px;
   background-size: 32px 32px;
@@ -83,6 +84,19 @@ body {
 .slide-next {
   right: 20px;
   background-image: url("../assets/svg/slider-next.svg");
+}
+
+.change-quote {
+  margin-bottom: 30px;
+  background-image: url("../assets/svg/reload.svg");
+}
+
+.quote {
+  min-height: 32px;
+}
+
+.author {
+  min-height: 20px;
 }
 
 .time {
