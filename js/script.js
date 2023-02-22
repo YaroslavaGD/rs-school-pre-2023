@@ -1,3 +1,4 @@
+import playList from "./playList.js";
 const TIME_OF_DAY = ['morning', 'afternoon', 'evening', 'night'];
 let backgroundNumber = 1;
 
@@ -28,12 +29,21 @@ const changeQuoteButton = document.querySelector('.change-quote');
 const quoteOutput = document.querySelector('.quote');
 const authorOutput = document.querySelector('.author');
 
+const playButton = document.querySelector('.play');
+const playNextButton = document.querySelector('.play-next');
+const playPrevButton = document.querySelector('.play-prev');
+const playListContainer = document.querySelector('.play-list');
+
+const audio = new Audio();
+let isPlay = false;
+let playNum = 0;
+
 
 showTime();
 setRandomBackgroundNum(1,20);
 setBackground();
 getQuotes();
-
+generatePlayList();
 
 //====================== TIME AND DATE ======================
 function showTime() {
@@ -181,3 +191,74 @@ async function getQuotes() {
   authorOutput.textContent = data[randomNumber].author;
 }
 changeQuoteButton.addEventListener('click', getQuotes);
+
+
+//====================== PLAYER ======================
+function playAudio() {
+  isPlay = true;
+  playButton.classList.add('pause');
+  audio.src = playList[playNum].src;
+  audio.currentTime = 0;
+  playListContainer.querySelectorAll('.play-item').forEach(element => element.classList.remove('item-active'));
+  playListContainer.querySelector(`li[data-number="${playNum}"]`).classList.add('item-active');
+  audio.play();
+}
+
+function stopAudio() {
+  isPlay = false;
+  playButton.classList.remove('pause');
+  audio.pause();
+}
+
+function playStopAudio() {
+  if (isPlay) {
+    console.log('stop');
+    stopAudio();
+  } else {
+    console.log('play');
+    playAudio();
+  }
+
+  // isPlay = !isPlay;
+}
+playButton.addEventListener('click', playStopAudio);
+
+function nextPlayNum() {
+  if (playNum == playList.length - 1) return 0;
+  return playNum + 1;
+}
+
+function prevPlayNum() {
+  if (playNum == 0) return playList.length - 1;
+  return playNum - 1;
+}
+
+function playNextAudio() {
+  playNum = nextPlayNum();
+  playAudio();
+}
+playNextButton.addEventListener('click', playNextAudio);
+
+function playPrevAudio() {
+  playNum = prevPlayNum();
+  playAudio();
+}
+playPrevButton.addEventListener('click', playPrevAudio);
+
+function playThisAudio() {
+  playNum = Number(this.getAttribute('data-number'));
+  playAudio();
+}
+
+function generatePlayList() {
+  playList.forEach((element, index) => {
+    const li = document.createElement('li');
+
+    li.classList.add('play-item');
+    li.textContent = element.title;
+    li.setAttribute('data-number', index);
+
+    playListContainer.append(li);
+    li.addEventListener('click', playThisAudio);
+  });
+}
