@@ -21,11 +21,18 @@ const LOCAL_LANGUAGE = {
     'en' : ['Wind speed:', 'm/s', 'Humidity:', 'City ', ' not found.'],
     'de' : ['Windgeschwindigkeit:', 'm/s', 'Feuchtigkeit:', 'Die Stadt ', ' wurde nicht gefunden.']
   },
+
+  'CITY_DEFAULT' : {
+    'ru' : 'Минск',
+    'ua' : 'Мінськ',
+    'en' : 'Minsk',
+    'de' : 'Minsk'
+  }
 };
 
 
 let backgroundNumber = 1;
-let language = 'en';
+let language = 'ua';
 
 
 const body = document.querySelector('body');
@@ -89,22 +96,31 @@ function getLocalStorage() {
   const cityLocalStorage = localStorage.getItem('city');
   const languageLocalStorage = localStorage.getItem('language');
   
-    if (languageLocalStorage) {
-      language = languageLocalStorage;
-      getQuotes();
+  if (languageLocalStorage) {
+    language = languageLocalStorage;
+    getQuotes();
+    languageSettings.forEach(element => {
+      element.classList.remove('active');
+    });
+    document.querySelector(`li[data-language="${language}"]`).classList.add('active');
+  } else {
+    language = 'en';
+    getQuotes();
+    languageSettings.forEach(element => {
+      element.classList.remove('active');
+    });
+    document.querySelector(`li[data-language="${language}"]`).classList.add('active');
+  }
 
-        // document.querySelector(`li[data-language="${language}"]`).classList.remove('active');
-      languageSettings.forEach(element => {
-        element.classList.remove('active');
-      });
-      document.querySelector(`li[data-language="${language}"]`).classList.add('active');
-    }
   if (nameLocalStorage) {
     nameInput.value = nameLocalStorage;
   }
 
   if (cityLocalStorage) {
     cityInput.value = cityLocalStorage;
+    getWeather();
+  } else {
+    cityInput.value = LOCAL_LANGUAGE.CITY_DEFAULT[language];
     getWeather();
   }
 }
@@ -191,7 +207,10 @@ slidePrev.addEventListener('click', getSlidePrev);
 //====================== WEATHER ======================
 async function getWeather () {
   try {
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${cityInput.value}&lang=${language}&appid=a8ac1027e738e7638e87d25781881790&units=metric`;
+    let city = cityInput.value;
+    if (city === 'Мінськ') city = 'Минск';
+
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&lang=${language}&appid=a8ac1027e738e7638e87d25781881790&units=metric`;
     const res = await fetch(url);
     const data = await res.json();
     weatherIconOutput.className = 'weather-icon owf';
@@ -202,7 +221,7 @@ async function getWeather () {
     humidityOutput.textContent = `${LOCAL_LANGUAGE.WEATHER_TITLE[language][2]} \u00A0${data.main.humidity}%`;
     weatherErrorOutput.textContent = '';
   } catch (error) {
-    weatherErrorOutput.textContent = `${LOCAL_LANGUAGE.WEATHER_TITLE[language][3]} "` + cityInput.value + `" ${LOCAL_LANGUAGE.WEATHER_TITLE[language][4]}`;
+    weatherErrorOutput.textContent = `${LOCAL_LANGUAGE.WEATHER_TITLE[language][3]} "` + city + `" ${LOCAL_LANGUAGE.WEATHER_TITLE[language][4]}`;
     weatherIconOutput.className = 'weather-icon owf';
     temperatureOutput.textContent = '';
     weatherDescriptionOutput.textContent = '';
@@ -315,6 +334,13 @@ function setLanguage(){
     element.classList.remove('active');
   });
   this.classList.add('active');
+
+  if ((LOCAL_LANGUAGE.CITY_DEFAULT.ua === cityInput.value) || 
+      (LOCAL_LANGUAGE.CITY_DEFAULT.ru === cityInput.value) || 
+      (LOCAL_LANGUAGE.CITY_DEFAULT.en === cityInput.value) || 
+      (LOCAL_LANGUAGE.CITY_DEFAULT.de === cityInput.value)) {
+        cityInput.value = LOCAL_LANGUAGE.CITY_DEFAULT[language];
+  }
   getWeather();
   getQuotes();
 }
