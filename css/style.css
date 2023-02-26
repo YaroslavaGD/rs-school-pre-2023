@@ -248,5 +248,44 @@ body {
 }
 
 .item-active::before {
-  color: #C5B358;
+  color: #FF0090;
+}
+
+.footer-module {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  align-items: flex-end;
+}
+
+.language {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+.language-item {
+  text-transform: uppercase;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: .3s;
+}
+
+.language-item.active {
+  color: 	#FF0090;
+}
+
+.language-item:hover {
+  opacity: 1;
+}
+
+.language-item:active {
+  border: 0;
+  outline: 0;
+  transform: scale(1.1);
+}
+
+.language-item + .language-item {
+  margin-left: 10px;
 }

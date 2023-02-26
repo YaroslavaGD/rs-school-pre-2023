@@ -5,17 +5,17 @@ const playList = [
     duration: '01:58'
   },
   {
-    title: 'Broke For Free',
+    title: 'Broke For Free - Night Owl',
     src: 'assets/sounds/test/BrokeForFree-NightOwl.mp3',
     duration: '03:14'
   },
   {
-    title: 'Brookers Blues',
+    title: 'Audionautix - Brookers Blues',
     src: 'assets/sounds/test/BrookersBlues.mp3',
     duration: '03:14'
   },
   {
-    title: 'Dance Dubber',
+    title: 'Audionautix - Dance Dubber',
     src: 'assets/sounds/test/DanceDubber.mp3',
     duration: '01:35'
   },

@@ -1,6 +1,31 @@
 import playList from "./playList.js";
 const TIME_OF_DAY = ['morning', 'afternoon', 'evening', 'night'];
+const LOCAL_LANGUAGE = {
+  'GREETING_TRANSLATION' : {
+    'ru' : ['Доброе утро', 'Добрый день', 'Добрый вечер', 'Доброй ночи', '[Введите своё имя]'],
+    'ua' : ['Доброго ранку', 'Доброго дня', 'Доброго вечора', 'Доброї ночі', '[Введіть своє ім\'я]'],
+    'en' : ['Good morning', 'Good afternoon', 'Good evening', 'Good night', '[Enter your name]'],
+    'de' : ['Guten Morgen', 'Guten Tag', 'Guten Abend', 'Gute Nacht', '[Geben Sie Ihren Namen ein]']
+  },
+
+  'TIME_ZONE_NAME' : {
+    'ru' : 'ru-RU',
+    'ua' : 'uk-UA',
+    'en' : 'en-US',
+    'de' : 'de-De'
+  },
+
+  'WEATHER_TITLE' : {
+    'ru' : ['Скорость ветра:', 'м/c', 'Влажность:', 'Город ', ' не найден.'],
+    'ua' : ['Швідкість вітру:', 'м/c', 'Вологість:', 'Місто ', ' не знайдено.'],
+    'en' : ['Wind speed:', 'm/s', 'Humidity:', 'City ', ' not found.'],
+    'de' : ['Windgeschwindigkeit:', 'm/s', 'Feuchtigkeit:', 'Die Stadt ', ' wurde nicht gefunden.']
+  },
+};
+
+
 let backgroundNumber = 1;
+let language = 'en';
 
 
 const body = document.querySelector('body');
@@ -38,12 +63,52 @@ const audio = new Audio();
 let isPlay = false;
 let playNum = 0;
 
+const languageSettings = document.querySelectorAll('.language-item');
 
-showTime();
-setRandomBackgroundNum(1,20);
-setBackground();
-getQuotes();
-generatePlayList();
+//====================== FIRST SETTINGS ======================
+setFirstSettings();
+
+function setFirstSettings() {
+  showTime();
+  setRandomBackgroundNum(1,20);
+  setBackground();
+  generatePlayList(); 
+}
+
+//====================== LOCAL STORAGE ======================
+function setLocalStorage() {
+  localStorage.setItem('name', nameInput.value);
+  localStorage.setItem('city', cityInput.value);
+  localStorage.setItem('language', language);
+}
+
+window.addEventListener('beforeunload', setLocalStorage);
+
+function getLocalStorage() {
+  const nameLocalStorage = localStorage.getItem('name');
+  const cityLocalStorage = localStorage.getItem('city');
+  const languageLocalStorage = localStorage.getItem('language');
+  
+    if (languageLocalStorage) {
+      language = languageLocalStorage;
+      getQuotes();
+
+        // document.querySelector(`li[data-language="${language}"]`).classList.remove('active');
+      languageSettings.forEach(element => {
+        element.classList.remove('active');
+      });
+      document.querySelector(`li[data-language="${language}"]`).classList.add('active');
+    }
+  if (nameLocalStorage) {
+    nameInput.value = nameLocalStorage;
+  }
+
+  if (cityLocalStorage) {
+    cityInput.value = cityLocalStorage;
+    getWeather();
+  }
+}
+window.addEventListener('load', getLocalStorage);
 
 //====================== TIME AND DATE ======================
 function showTime() {
@@ -60,7 +125,7 @@ function showTime() {
 function showDate() {
   const date = new Date();
   const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-  const currentDate = date.toLocaleDateString('de-De', options);
+  const currentDate = date.toLocaleDateString(`${LOCAL_LANGUAGE.TIME_ZONE_NAME[language]}`, options);
   dateOutput.textContent = currentDate;
 }
 
@@ -68,45 +133,23 @@ function getTimeOfDay(){
   const date = new Date();
   const hours = date.getHours();
   
-  if (hours >= 0 && hours < 12) return TIME_OF_DAY[0];
+  if (hours >= 0 && hours < 12) return 0;
   
-  if (hours >= 12 && hours < 17) return TIME_OF_DAY[1];
+  if (hours >= 12 && hours < 18) return 1;
   
-  if (hours >= 17 && hours < 20) return TIME_OF_DAY[2];
+  if (hours >= 18 && hours < 20) return 2;
   
-  if (hours >= 20 && hours < 24) return TIME_OF_DAY[3];
+  if (hours >= 20 && hours < 24) return 3;
 
-  return TIME_OF_DAY[0];
+  return 0;
 }
 
 function showGreeting() {
-  const timeOfDay = getTimeOfDay();
-  const greetingText = `Good ${timeOfDay},`;
+  const numberTime = getTimeOfDay();
+  const greetingText = `${LOCAL_LANGUAGE.GREETING_TRANSLATION[language][numberTime]},`;
   greetingOutput.textContent = greetingText;
+  nameInput.setAttribute('placeholder', LOCAL_LANGUAGE.GREETING_TRANSLATION[language][4]);
 }
-
-
-//====================== LOCAL STORAGE ======================
-function setLocalStorage() {
-  localStorage.setItem('name', nameInput.value);
-  localStorage.setItem('city', cityInput.value);
-}
-
-window.addEventListener('beforeunload', setLocalStorage);
-
-function getLocalStorage() {
-  const nameLocalStorage = localStorage.getItem('name');
-  const cityLocalStorage = localStorage.getItem('city');
-  if (nameLocalStorage) {
-    nameInput.value = nameLocalStorage;
-  }
-
-  if (cityLocalStorage) {
-    cityInput.value = cityLocalStorage;
-    getWeather();
-  }
-}
-window.addEventListener('load', getLocalStorage);
 
 
 //====================== BACKGROUND AND SLIDER ======================
@@ -121,12 +164,12 @@ function setRandomBackgroundNum(min, max) {
 }
 
 function setBackground(){
-  const timeOfDay = getTimeOfDay();
+  const numberTime = getTimeOfDay();
 
   let backgroundName =  backgroundNumber < 10 ? "0" + backgroundNumber : backgroundNumber;
   const img = new Image();
 
-  img.src = `https://raw.githubusercontent.com/YaroslavaGD/stage1-tasks/assets/images/${timeOfDay}/${backgroundName}.jpg`;
+  img.src = `https://raw.githubusercontent.com/YaroslavaGD/stage1-tasks/assets/images/${TIME_OF_DAY[numberTime]}/${backgroundName}.jpg`;
   img.onload = () => {
     body.style.backgroundImage = `url(${img.src})`;
   }
@@ -146,21 +189,20 @@ slidePrev.addEventListener('click', getSlidePrev);
 
 
 //====================== WEATHER ======================
-
 async function getWeather () {
   try {
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${cityInput.value}&lang=ru&appid=a8ac1027e738e7638e87d25781881790&units=metric`;
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${cityInput.value}&lang=${language}&appid=a8ac1027e738e7638e87d25781881790&units=metric`;
     const res = await fetch(url);
     const data = await res.json();
     weatherIconOutput.className = 'weather-icon owf';
     weatherIconOutput.classList.add(`owf-${data.weather[0].id}`);
     temperatureOutput.textContent = `${data.main.temp.toFixed(0)}°C`;
     weatherDescriptionOutput.textContent = data.weather[0].description;
-    windOutput.textContent = `Wind speed:\u00A0${data.wind.speed.toFixed(0)}м/с`;
-    humidityOutput.textContent = `Humidity:\u00A0${data.main.humidity}%`;
+    windOutput.textContent = `${LOCAL_LANGUAGE.WEATHER_TITLE[language][0]} \u00A0${data.wind.speed.toFixed(0)}${LOCAL_LANGUAGE.WEATHER_TITLE[language][1]}`;
+    humidityOutput.textContent = `${LOCAL_LANGUAGE.WEATHER_TITLE[language][2]} \u00A0${data.main.humidity}%`;
     weatherErrorOutput.textContent = '';
   } catch (error) {
-    weatherErrorOutput.textContent = 'City "' + cityInput.value + '" not found.';
+    weatherErrorOutput.textContent = `${LOCAL_LANGUAGE.WEATHER_TITLE[language][3]} "` + cityInput.value + `" ${LOCAL_LANGUAGE.WEATHER_TITLE[language][4]}`;
     weatherIconOutput.className = 'weather-icon owf';
     temperatureOutput.textContent = '';
     weatherDescriptionOutput.textContent = '';
@@ -179,9 +221,14 @@ cityInput.addEventListener('keypress', setWeather);
 
 
 //====================== QUOTES ======================
-
 async function getQuotes() {
-  const quotes = 'data.json';
+  let quotes = "";
+  if (language == "ua") quotes = 'dataua.json';
+  if (language == "ru") quotes = 'data.json';
+  if (language == "en") quotes = 'https://type.fit/api/quotes';
+  if (language == "de") quotes = 'datade.json';
+
+  
   const res = await fetch(quotes);
   const data = await res.json();
 
@@ -190,6 +237,7 @@ async function getQuotes() {
   quoteOutput.textContent = '"' + data[randomNumber].text + '"';
   authorOutput.textContent = data[randomNumber].author;
 }
+
 changeQuoteButton.addEventListener('click', getQuotes);
 
 
@@ -212,14 +260,10 @@ function stopAudio() {
 
 function playStopAudio() {
   if (isPlay) {
-    console.log('stop');
     stopAudio();
   } else {
-    console.log('play');
     playAudio();
   }
-
-  // isPlay = !isPlay;
 }
 playButton.addEventListener('click', playStopAudio);
 
@@ -262,3 +306,19 @@ function generatePlayList() {
     li.addEventListener('click', playThisAudio);
   });
 }
+
+//====================== LANGUAGE =====================
+
+function setLanguage(){
+  language = this.getAttribute('data-language');
+  languageSettings.forEach(element => {
+    element.classList.remove('active');
+  });
+  this.classList.add('active');
+  getWeather();
+  getQuotes();
+}
+
+languageSettings.forEach(element => {
+  element.addEventListener('click', setLanguage);
+});
