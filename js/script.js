@@ -163,15 +163,15 @@ function getTimeOfDay(){
   const date = new Date();
   const hours = date.getHours();
   
-  if (hours >= 0 && hours < 12) return 0;
+  if (hours >= 6 && hours < 12) return 0;
   
   if (hours >= 12 && hours < 18) return 1;
   
-  if (hours >= 18 && hours < 20) return 2;
+  if (hours >= 18 && hours < 24) return 2;
   
-  if (hours >= 20 && hours < 24) return 3;
+  if (hours >= 0 && hours < 6) return 3;
 
-  return 0;
+  return 3;
 }
 
 function showGreeting() {
@@ -276,8 +276,8 @@ slidePrev.addEventListener('click', getSlidePrev);
 
 //====================== WEATHER ======================
 async function getWeather () {
+  let city = cityInput.value;
   try {
-    let city = cityInput.value;
     if (city === 'Мінськ') city = 'Минск';
 
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&lang=${language}&appid=a8ac1027e738e7638e87d25781881790&units=metric`;
@@ -383,6 +383,10 @@ function playThisAudio() {
   playNum = Number(this.getAttribute('data-number'));
   playAudio();
 }
+
+audio.onended = function() {
+  playNextAudio();
+};
 
 function generatePlayList() {
   playList.forEach((element, index) => {
