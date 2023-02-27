@@ -71,6 +71,8 @@ let isPlay = false;
 let playNum = 0;
 
 const languageSettings = document.querySelectorAll('.language-item');
+const imageSettings = document.querySelectorAll('.source-item');
+let imageSource = 'unsplash';
 
 //====================== FIRST SETTINGS ======================
 setFirstSettings();
@@ -87,6 +89,7 @@ function setLocalStorage() {
   localStorage.setItem('name', nameInput.value);
   localStorage.setItem('city', cityInput.value);
   localStorage.setItem('language', language);
+  localStorage.setItem('imageSource', imageSource);
 }
 
 window.addEventListener('beforeunload', setLocalStorage);
@@ -95,6 +98,7 @@ function getLocalStorage() {
   const nameLocalStorage = localStorage.getItem('name');
   const cityLocalStorage = localStorage.getItem('city');
   const languageLocalStorage = localStorage.getItem('language');
+  const imageSourceLocalStorage = localStorage.getItem('imageSource');
   
   if (languageLocalStorage) {
     language = languageLocalStorage;
@@ -122,6 +126,16 @@ function getLocalStorage() {
   } else {
     cityInput.value = LOCAL_LANGUAGE.CITY_DEFAULT[language];
     getWeather();
+  }
+
+  if (imageSourceLocalStorage) {
+    imageSource = imageSourceLocalStorage;
+    // setBackground();
+    
+    imageSettings.forEach(element => {
+      element.classList.remove('active');
+    });
+    document.querySelector(`li[data-source="${imageSource}"]`).classList.add('active');
   }
 }
 window.addEventListener('load', getLocalStorage);
@@ -179,17 +193,73 @@ function setRandomBackgroundNum(min, max) {
   backgroundNumber = getRandomNum(min, max);
 }
 
-function setBackground(){
+async function setBackground(){
   const numberTime = getTimeOfDay();
 
   let backgroundName =  backgroundNumber < 10 ? "0" + backgroundNumber : backgroundNumber;
   const img = new Image();
 
-  img.src = `https://raw.githubusercontent.com/YaroslavaGD/stage1-tasks/assets/images/${TIME_OF_DAY[numberTime]}/${backgroundName}.jpg`;
-  img.onload = () => {
-    body.style.backgroundImage = `url(${img.src})`;
+  if (imageSource === 'default') {
+    
+    img.src = `https://raw.githubusercontent.com/YaroslavaGD/stage1-tasks/assets/images/${TIME_OF_DAY[numberTime]}/${backgroundName}.jpg`;
+    img.onload = () => {
+      body.style.backgroundImage = `url(${img.src})`;
+    }
+  }
+  if (imageSource === 'unsplash') {
+    try {
+      img.src = await getUnsplashLinkToImage();
+      img.onload = () => {
+        body.style.backgroundImage = `url(${img.src})`;
+      }
+    } catch (error) {
+      img.src = `https://raw.githubusercontent.com/YaroslavaGD/stage1-tasks/assets/images/${TIME_OF_DAY[numberTime]}/${backgroundName}.jpg`;
+      img.onload = () => {
+        body.style.backgroundImage = `url(${img.src})`;
+      }
+    }
+  }
+
+  if (imageSource === 'flickr') {
+    try {
+      img.src = await getFlickrLinkToImage();
+      img.onload = () => {
+        body.style.backgroundImage = `url(${img.src})`;
+      }
+    } catch (error) {
+      img.src = `https://raw.githubusercontent.com/YaroslavaGD/stage1-tasks/assets/images/${TIME_OF_DAY[numberTime]}/${backgroundName}.jpg`;
+      img.onload = () => {
+        body.style.backgroundImage = `url(${img.src})`;
+      }
+    }
   }
 }
+
+async function getUnsplashLinkToImage() {
+  const numberTime = getTimeOfDay();
+  const url = `https://api.unsplash.com/photos/random?orientation=landscape&query=${TIME_OF_DAY[numberTime]}&client_id=OAcnfMwpBHTzq_k7VPaZWQP-pm35U9uPqCow2K2JqCI`;
+  const res = await fetch(url);
+  const data = await res.json();
+  return data.urls.regular;
+}
+
+async function getFlickrLinkToImage() {
+  const numberTime = getTimeOfDay();
+  const url = `https://www.flickr.com/services/rest/?method=flickr.photos.search&api_key=e7f979358cc1ac67a323ae4d31292df0&tags=${TIME_OF_DAY[numberTime]}&extras=url_l&format=json&nojsoncallback=1`;
+  const res = await fetch(url);
+  const data = await res.json();
+  const numberPhoto = getRandomNum(0, data.photos.photo.length - 1);
+  return data.photos.photo[numberPhoto].url_l;
+}
+getFlickrLinkToImage();
+
+function setImageSource() {
+  imageSource = this.getAttribute('data-source');
+  imageSettings.forEach(el => el.classList.remove('active'));
+  this.classList.add('active');
+  setBackground();
+}
+imageSettings.forEach(el => el.addEventListener('click', setImageSource));
 
 function getSlideNext() {
   backgroundNumber = backgroundNumber == 20 ? 1 : backgroundNumber + 1;
@@ -269,6 +339,7 @@ function playAudio() {
   playListContainer.querySelectorAll('.play-item').forEach(element => element.classList.remove('item-active'));
   playListContainer.querySelector(`li[data-number="${playNum}"]`).classList.add('item-active');
   audio.play();
+
 }
 
 function stopAudio() {
@@ -348,3 +419,24 @@ function setLanguage(){
 languageSettings.forEach(element => {
   element.addEventListener('click', setLanguage);
 });
+
+
+(function () {
+  console.log('Yaroslava Hryzadubova. Momentum\n------------------------------------------\nScore 118/150\n');
+  console.log('Сделано не все:\n------------------------------------------\n');
+  console.log('Оценка по пунктам:\n------------------------------------------\n');
+  console.log('1. Часы и календарь +15\n');
+  console.log('2. Приветствие +10\n');
+  console.log('3. Смена фонового изображения +20\n');
+  console.log('4. Виджет погоды +15\n');
+  console.log('5. Виджет цитата дня +10\n');
+  console.log('6. Аудиоплеер +12 - не проигрывается следующая песня, когда закончилась предыдущая\n');
+  console.log('7. Продвинутый аудиоплеер +0 - не реализовано\n');
+  console.log('8. Перевод приложения на два языка (en/ru или en/be) +15\n');
+  console.log('9. Получение фонового изображения от API +10\n');
+  console.log('10. Настройки приложения +11\n');
+  console.log('--. в настройках приложения можно указать язык приложения (en/ru или en/be) +3\n');
+  console.log('--. в настройках приложения можно указать источник получения фото для фонового изображения: коллекция изображений GitHub, Unsplash API, Flickr API +3\n');
+  console.log('--. настройки приложения сохраняются при перезагрузке страницы +5\n');
+  console.log('11. Дополнительный функционал на выбор +0\n');
+}());

@@ -258,34 +258,40 @@ body {
   align-items: flex-end;
 }
 
-.language {
+.language, 
+.source {
   display: flex;
   margin: 0;
   padding: 0;
   list-style-type: none;
 }
 
-.language-item {
+.language-item,
+.source-item {
   text-transform: uppercase;
   cursor: pointer;
   opacity: 0.8;
   transition: .3s;
 }
 
-.language-item.active {
+.language-item.active,
+.source-item.active  {
   color: 	#FF0090;
 }
 
-.language-item:hover {
+.language-item:hover,
+.source-item:hover {
   opacity: 1;
 }
 
-.language-item:active {
+.language-item:active,
+.source-item:active {
   border: 0;
   outline: 0;
   transform: scale(1.1);
 }
 
-.language-item + .language-item {
+.language-item + .language-item,
+.source-item + .source-item {
   margin-left: 10px;
 }
